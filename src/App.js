@@ -3,6 +3,8 @@ import NoteForm from "./NoteForm";
 
 function App() {
   const [notes, setNotes] = useState([]);
+  const [editIndex, setEditIndex] = useState(null); // Index of the note being edited
+  const [editText, setEditText] = useState(""); // Text of the note being edited
 
   // Load notes from local storage when the app starts
   useEffect(() => {
@@ -30,62 +32,73 @@ function App() {
     setNotes(newNotes);
   };
 
+  // Start editing a note
+  const startEditing = (index) => {
+    setEditIndex(index);
+    setEditText(notes[index]);
+  };
+
+  // Save the edited note
+  const saveEditedNote = () => {
+    const updatedNotes = [...notes];
+    updatedNotes[editIndex] = editText; // Update the note at the specified index
+    setNotes(updatedNotes);
+    setEditIndex(null); // Stop editing
+    setEditText(""); // Clear the edit text
+  };
+
   return (
-    <div style={styles.container}>
-      <h1 style={styles.header}>Notes App</h1>
+    <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-lg">
+      <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+        Notes App
+      </h1>
       <NoteForm addNote={addNote} />
-      <ul style={styles.noteList}>
+
+      <ul className="space-y-4">
         {notes.map((note, index) => (
-          <li key={index} style={styles.noteItem}>
-            {note}
-            <button
-              onClick={() => deleteNote(index)}
-              style={styles.deleteButton}
-            >
-              Delete
-            </button>
+          <li
+            key={index}
+            className="flex justify-between items-center p-4 bg-gray-100 rounded-lg shadow-md"
+          >
+            {editIndex === index ? (
+              <div className="flex items-center space-x-2">
+                <input
+                  type="text"
+                  value={editText}
+                  onChange={(e) => setEditText(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg w-3/4"
+                />
+                <button
+                  onClick={saveEditedNote}
+                  className="bg-green-500 text-white px-4 py-2 rounded-lg"
+                >
+                  Save
+                </button>
+              </div>
+            ) : (
+              <>
+                <span className="text-gray-800">{note}</span>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => startEditing(index)}
+                    className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => deleteNote(index)}
+                    className="bg-red-500 text-white px-4 py-2 rounded-lg"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </>
+            )}
           </li>
         ))}
       </ul>
     </div>
   );
 }
-
-// Inline CSS styles
-const styles = {
-  container: {
-    textAlign: "center",
-    maxWidth: "500px",
-    margin: "0 auto",
-    padding: "20px",
-    backgroundColor: "#fff",
-    borderRadius: "10px",
-    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-  },
-  header: {
-    marginBottom: "20px",
-    color: "#333",
-  },
-  noteList: {
-    listStyle: "none",
-    padding: 0,
-  },
-  noteItem: {
-    display: "flex",
-    justifyContent: "space-between",
-    padding: "10px",
-    margin: "5px 0",
-    backgroundColor: "#f4f4f4",
-    borderRadius: "5px",
-  },
-  deleteButton: {
-    backgroundColor: "#e74c3c",
-    color: "#fff",
-    border: "none",
-    padding: "5px 10px",
-    borderRadius: "5px",
-    cursor: "pointer",
-  },
-};
 
 export default App;
