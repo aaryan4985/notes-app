@@ -1,25 +1,46 @@
 import React, { useState } from "react";
 
 function NoteForm({ addNote }) {
-  const [note, setNote] = useState("");
+  const [noteText, setNoteText] = useState("");
+  const [noteColor, setNoteColor] = useState("#ffffff"); // Default color is white
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (note.trim()) {
-      addNote(note);
-      setNote("");
-    }
+    if (noteText.trim() === "") return;
+    addNote({ text: noteText, color: noteColor }); // Pass note text and color
+    setNoteText("");
+    setNoteColor("#ffffff"); // Reset to default
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        type="text"
-        placeholder="Write a note..."
-        value={note}
-        onChange={(e) => setNote(e.target.value)}
-      />
-      <button type="submit">Add Note</button>
+    <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
+      <textarea
+        value={noteText}
+        onChange={(e) => setNoteText(e.target.value)}
+        placeholder="Write your note here..."
+        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+        rows="3"
+      ></textarea>
+
+      <div className="flex items-center space-x-4">
+        <label htmlFor="colorPicker" className="text-gray-600">
+          Pick a color:
+        </label>
+        <input
+          type="color"
+          id="colorPicker"
+          value={noteColor}
+          onChange={(e) => setNoteColor(e.target.value)}
+          className="w-10 h-10 border rounded-full"
+        />
+      </div>
+
+      <button
+        type="submit"
+        className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+      >
+        Add Note
+      </button>
     </form>
   );
 }

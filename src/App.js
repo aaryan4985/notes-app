@@ -3,100 +3,145 @@ import NoteForm from "./NoteForm";
 
 function App() {
   const [notes, setNotes] = useState([]);
-  const [editIndex, setEditIndex] = useState(null); // Index of the note being edited
-  const [editText, setEditText] = useState(""); // Text of the note being edited
+  const [editIndex, setEditIndex] = useState(null);
+  const [editText, setEditText] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [darkMode, setDarkMode] = useState(false);
 
-  // Load notes from local storage when the app starts
+  // Load notes and dark mode preference from localStorage
   useEffect(() => {
     const savedNotes = localStorage.getItem("notes");
+    const savedDarkMode = localStorage.getItem("darkMode");
     if (savedNotes) {
-      setNotes(JSON.parse(savedNotes)); // If notes exist in localStorage, load them
+      setNotes(JSON.parse(savedNotes));
+    }
+    if (savedDarkMode) {
+      setDarkMode(JSON.parse(savedDarkMode));
     }
   }, []);
 
-  // Update local storage whenever notes change
+  // Save notes to localStorage
   useEffect(() => {
     if (notes.length > 0) {
       localStorage.setItem("notes", JSON.stringify(notes));
     }
   }, [notes]);
 
-  // Add a new note
+  // Save dark mode preference to localStorage
+  useEffect(() => {
+    localStorage.setItem("darkMode", JSON.stringify(darkMode));
+    if (darkMode) {
+      document.body.classList.add("dark"); // Add 'dark' class to body
+    } else {
+      document.body.classList.remove("dark"); // Remove 'dark' class from body
+    }
+  }, [darkMode]);
+
   const addNote = (note) => {
     setNotes([...notes, note]);
   };
 
-  // Delete a note by index
   const deleteNote = (index) => {
     const newNotes = notes.filter((_, i) => i !== index);
     setNotes(newNotes);
   };
 
-  // Start editing a note
   const startEditing = (index) => {
     setEditIndex(index);
-    setEditText(notes[index]);
+    setEditText(notes[index].text);
   };
 
-  // Save the edited note
   const saveEditedNote = () => {
     const updatedNotes = [...notes];
-    updatedNotes[editIndex] = editText; // Update the note at the specified index
+    updatedNotes[editIndex].text = editText;
     setNotes(updatedNotes);
-    setEditIndex(null); // Stop editing
-    setEditText(""); // Clear the edit text
+    setEditIndex(null);
+    setEditText("");
+  };
+
+  const filteredNotes = notes.filter(
+    (note) =>
+      note.text && note.text.toLowerCase().includes(searchText.toLowerCase())
+  );
+
+  const toggleDarkMode = () => {
+    setDarkMode((prevMode) => !prevMode);
   };
 
   return (
-    <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-        Notes App
-      </h1>
-      <NoteForm addNote={addNote} />
-
-      <ul className="space-y-4">
-        {notes.map((note, index) => (
-          <li
-            key={index}
-            className="flex justify-between items-center p-4 bg-gray-100 rounded-lg shadow-md"
+    <div className="min-h-screen">
+      <div className="max-w-4xl mx-auto p-6 rounded-lg shadow-lg">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Google Keep-Like Notes App</h1>
+          <button
+            onClick={toggleDarkMode}
+            className="px-4 py-2 rounded-lg bg-blue-500 dark:bg-gray-700 text-white dark:text-gray-300"
           >
-            {editIndex === index ? (
-              <div className="flex items-center space-x-2">
-                <input
-                  type="text"
-                  value={editText}
-                  onChange={(e) => setEditText(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg w-3/4"
-                />
-                <button
-                  onClick={saveEditedNote}
-                  className="bg-green-500 text-white px-4 py-2 rounded-lg"
-                >
-                  Save
-                </button>
-              </div>
-            ) : (
-              <>
-                <span className="text-gray-800">{note}</span>
-                <div className="flex space-x-2">
+            {darkMode ? "Light Mode" : "Dark Mode"}
+          </button>
+        </div>
+
+        {/* Search Bar */}
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Search notes..."
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            className="w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+          />
+        </div>
+
+        {/* Note Form */}
+        <NoteForm addNote={addNote} darkMode={darkMode} />
+
+        {/* Notes Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+          {filteredNotes.map((note, index) => (
+            <div
+              key={index}
+              style={{ backgroundColor: note.color }}
+              className="p-4 rounded-lg shadow-md bg-gray-100 dark:bg-gray-800"
+            >
+              {editIndex === index ? (
+                <div className="flex flex-col space-y-2">
+                  <input
+                    type="text"
+                    value={editText}
+                    onChange={(e) => setEditText(e.target.value)}
+                    className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+                  />
                   <button
-                    onClick={() => startEditing(index)}
-                    className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                    onClick={saveEditedNote}
+                    className="bg-green-500 text-white px-4 py-2 rounded-lg"
                   >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => deleteNote(index)}
-                    className="bg-red-500 text-white px-4 py-2 rounded-lg"
-                  >
-                    Delete
+                    Save
                   </button>
                 </div>
-              </>
-            )}
-          </li>
-        ))}
-      </ul>
+              ) : (
+                <>
+                  <p className="mb-4">{note.text}</p>
+                  <div className="flex justify-end space-x-2">
+                    <button
+                      onClick={() => startEditing(index)}
+                      className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => deleteNote(index)}
+                      className="bg-red-500 text-white px-4 py-2 rounded-lg"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
