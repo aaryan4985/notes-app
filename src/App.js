@@ -10,15 +10,13 @@ function App() {
   useEffect(() => {
     const savedNotes = localStorage.getItem("notes");
     if (savedNotes) {
-      setNotes(JSON.parse(savedNotes)); // If notes exist in localStorage, load them
+      setNotes(JSON.parse(savedNotes)); // Load saved notes
     }
   }, []);
 
   // Update local storage whenever notes change
   useEffect(() => {
-    if (notes.length > 0) {
-      localStorage.setItem("notes", JSON.stringify(notes));
-    }
+    localStorage.setItem("notes", JSON.stringify(notes));
   }, [notes]);
 
   // Add a new note
@@ -41,32 +39,32 @@ function App() {
   // Save the edited note
   const saveEditedNote = () => {
     const updatedNotes = [...notes];
-    updatedNotes[editIndex] = editText; // Update the note at the specified index
+    updatedNotes[editIndex] = editText; // Update the note
     setNotes(updatedNotes);
-    setEditIndex(null); // Stop editing
-    setEditText(""); // Clear the edit text
+    setEditIndex(null);
+    setEditText("");
   };
 
   return (
-    <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-        Notes App
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
+        Responsive Notes App
       </h1>
       <NoteForm addNote={addNote} />
 
-      <ul className="space-y-4">
+      <ul className="space-y-4 mt-8">
         {notes.map((note, index) => (
           <li
             key={index}
-            className="flex justify-between items-center p-4 bg-gray-100 rounded-lg shadow-md"
+            className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center bg-gray-100 p-4 rounded-lg shadow-md"
           >
             {editIndex === index ? (
-              <div className="flex items-center space-x-2">
+              <div className="flex flex-col sm:flex-row sm:items-center w-full">
                 <input
                   type="text"
                   value={editText}
                   onChange={(e) => setEditText(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg w-3/4"
+                  className="w-full sm:w-3/4 px-3 py-2 border border-gray-300 rounded-lg mb-2 sm:mb-0 sm:mr-2"
                 />
                 <button
                   onClick={saveEditedNote}
@@ -76,23 +74,23 @@ function App() {
                 </button>
               </div>
             ) : (
-              <>
-                <span className="text-gray-800">{note}</span>
-                <div className="flex space-x-2">
+              <div className="flex justify-between w-full">
+                <span className="text-gray-800 break-words">{note}</span>
+                <div className="flex mt-2 sm:mt-0">
                   <button
                     onClick={() => startEditing(index)}
-                    className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                    className="bg-blue-500 text-white px-3 py-2 rounded-lg mr-2"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => deleteNote(index)}
-                    className="bg-red-500 text-white px-4 py-2 rounded-lg"
+                    className="bg-red-500 text-white px-3 py-2 rounded-lg"
                   >
                     Delete
                   </button>
                 </div>
-              </>
+              </div>
             )}
           </li>
         ))}
