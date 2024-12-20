@@ -7,71 +7,53 @@ function App() {
   const [editIndex, setEditIndex] = useState(null);
   const [editText, setEditText] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [darkMode, setDarkMode] = useState(false);
 
-  // Load notes and dark mode preference from localStorage
+  // Load notes from localStorage
   useEffect(() => {
     const savedNotes = localStorage.getItem("notes");
-    const savedDarkMode = localStorage.getItem("darkMode");
-    console.log("Loaded notes:", savedNotes);
-    console.log("Loaded dark mode:", savedDarkMode);
     if (savedNotes) {
       try {
         const parsedNotes = JSON.parse(savedNotes);
-        // Ensure that each note has 'text' and 'color'
-        const validNotes = Array.isArray(parsedNotes)
-          ? parsedNotes.filter((note) => note.text && note.color)
-          : [];
-        setNotes(validNotes);
-        console.log("Parsed notes:", validNotes);
+        if (Array.isArray(parsedNotes)) {
+          // Filter valid notes
+          const validNotes = parsedNotes.filter(
+            (note) => note.text && note.color
+          );
+          setNotes(validNotes);
+        } else {
+          console.error("Invalid data format in localStorage.");
+          setNotes([]); // Fallback if the data isn't an array
+        }
       } catch (error) {
         console.error("Error parsing notes from localStorage:", error);
-        setNotes([]);
+        setNotes([]); // Fallback to empty notes in case of error
       }
-    }
-    if (savedDarkMode) {
-      setDarkMode(JSON.parse(savedDarkMode));
-      console.log("Set dark mode to:", JSON.parse(savedDarkMode));
     }
   }, []);
 
   // Save notes to localStorage
   useEffect(() => {
-    localStorage.setItem("notes", JSON.stringify(notes));
-    console.log("Saved notes to localStorage:", notes);
-  }, [notes]);
-
-  // Save dark mode preference to localStorage and apply 'dark' class to body
-  useEffect(() => {
-    localStorage.setItem("darkMode", JSON.stringify(darkMode));
-    console.log("Set dark mode to:", darkMode);
-    if (darkMode) {
-      document.body.classList.add("dark");
-      console.log("Added 'dark' class to body");
-    } else {
-      document.body.classList.remove("dark");
-      console.log("Removed 'dark' class from body");
+    // Only save if notes are not empty
+    if (notes.length > 0) {
+      localStorage.setItem("notes", JSON.stringify(notes));
     }
-  }, [darkMode]);
+  }, [notes]);
 
   const addNote = (note) => {
     if (note && note.text && note.color) {
       setNotes([...notes, note]);
-      console.log("Added note:", note);
     }
   };
 
   const deleteNote = (index) => {
     const newNotes = notes.filter((_, i) => i !== index);
     setNotes(newNotes);
-    console.log("Deleted note at index:", index);
   };
 
   const startEditing = (index) => {
     if (notes[index] && notes[index].text) {
       setEditIndex(index);
       setEditText(notes[index].text);
-      console.log("Started editing note at index:", index);
     }
   };
 
@@ -81,7 +63,6 @@ function App() {
     if (updatedNotes[editIndex]) {
       updatedNotes[editIndex].text = editText;
       setNotes(updatedNotes);
-      console.log("Saved edited note at index:", editIndex);
     }
     setEditIndex(null);
     setEditText("");
@@ -94,23 +75,12 @@ function App() {
       note.text.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  const toggleDarkMode = () => {
-    setDarkMode((prevMode) => !prevMode);
-    console.log("Toggled dark mode to:", !darkMode);
-  };
-
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+    <div className="min-h-screen bg-gray-100 text-gray-900">
       <div className="max-w-4xl mx-auto p-6 rounded-lg shadow-lg">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Google Keep-Like Notes App</h1>
-          <button
-            onClick={toggleDarkMode}
-            className="px-4 py-2 rounded-lg bg-blue-500 dark:bg-gray-700 text-white dark:text-gray-300 hover:bg-blue-600 dark:hover:bg-gray-600 transition duration-200"
-          >
-            {darkMode ? "Light Mode" : "Dark Mode"}
-          </button>
         </div>
 
         {/* Search Bar */}
@@ -120,20 +90,20 @@ function App() {
             placeholder="Search notes..."
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 border rounded-lg bg-white text-gray-900 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
         {/* Note Form */}
-        <NoteForm addNote={addNote} darkMode={darkMode} />
+        <NoteForm onAddNote={addNote} />
 
         {/* Notes Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
           {filteredNotes.map((note, index) => (
             <div
               key={index}
-              style={{ backgroundColor: note.color || "#ffffff" }} // Fallback color
-              className="p-4 rounded-lg shadow-md bg-gray-100 dark:bg-gray-800"
+              style={{ backgroundColor: note.color || "#ffffff" }}
+              className="p-4 rounded-lg shadow-md bg-gray-100"
             >
               {editIndex === index ? (
                 <div className="flex flex-col space-y-2">
@@ -141,7 +111,7 @@ function App() {
                     type="text"
                     value={editText}
                     onChange={(e) => setEditText(e.target.value)}
-                    className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="px-3 py-2 border rounded-lg bg-white text-gray-900 border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500"
                   />
                   <button
                     onClick={saveEditedNote}
