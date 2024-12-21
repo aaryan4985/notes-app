@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from "react";
-import NoteForm from "./NoteForm";
 import { DragDropContext, Draggable } from "react-beautiful-dnd";
 import { StrictModeDroppable } from "./StrictModeDroppable.js";
+import { Search, Plus, X, Edit2, Trash2 } from "lucide-react";
 
 function App() {
   const [notes, setNotes] = useState([]);
   const [editIndex, setEditIndex] = useState(null);
   const [editText, setEditText] = useState("");
   const [searchText, setSearchText] = useState("");
+  const [newNote, setNewNote] = useState({ text: "", color: "#ffffff" });
+  const [isFormVisible, setIsFormVisible] = useState(false);
 
+  // Load notes from localStorage
   useEffect(() => {
     const savedNotes = localStorage.getItem("notes");
     if (savedNotes) {
@@ -18,29 +21,35 @@ function App() {
           setNotes(parsedNotes);
         }
       } catch (error) {
-        console.error("Error parsing notes from localStorage:", error);
+        console.error("Error parsing notes:", error);
       }
     }
   }, []);
 
+  // Save notes to localStorage
   useEffect(() => {
-    if (notes.length > 0) {
-      localStorage.setItem("notes", JSON.stringify(notes));
-    }
+    localStorage.setItem("notes", JSON.stringify(notes));
   }, [notes]);
 
-  const addNote = (note) => {
-    if (note && note.text.trim() && note.color) {
-      const newNote = {
-        ...note,
+  const addNote = (e) => {
+    e?.preventDefault();
+    if (newNote.text.trim()) {
+      const noteToAdd = {
+        ...newNote,
         id: `note-${Date.now()}`,
+        text: newNote.text.trim(),
       };
-      setNotes((prevNotes) => [...prevNotes, newNote]);
+      setNotes((prevNotes) => [...prevNotes, noteToAdd]);
+      setNewNote({ text: "", color: "#ffffff" });
+      setIsFormVisible(false);
     }
   };
 
   const deleteNote = (index) => {
     setNotes((prevNotes) => prevNotes.filter((_, i) => i !== index));
+    if (editIndex === index) {
+      cancelEditing();
+    }
   };
 
   const startEditing = (index) => {
@@ -69,7 +78,7 @@ function App() {
 
   const handleDragEnd = (result) => {
     const { source, destination } = result;
-    if (!destination) return;
+    if (!destination || source.index === destination.index) return;
 
     setNotes((prevNotes) => {
       const reorderedNotes = Array.from(prevNotes);
@@ -84,37 +93,91 @@ function App() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800">
-      <div className="max-w-4xl mx-auto p-6 rounded-lg shadow-lg bg-white">
-        <header className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-blue-600">
-            Google Keep Notes
-          </h1>
-        </header>
+    <div className="min-h-screen bg-gray-100">
+      {/* Header */}
+      <header className="bg-white shadow-sm py-4 px-6 sticky top-0 z-10">
+        <div className="max-w-6xl mx-auto flex items-center gap-6">
+          <h1 className="text-xl font-semibold text-gray-800">Keep Notes</h1>
+          <div className="flex-1 max-w-xl relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <input
+              type="text"
+              placeholder="Search notes..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-gray-50 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            />
+          </div>
+        </div>
+      </header>
 
-        <div className="mb-4">
-          <input
-            type="text"
-            placeholder="Search notes..."
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg bg-white text-gray-900 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+      <main className="max-w-6xl mx-auto px-6 py-8">
+        {/* Note Creation Form */}
+        <div className="max-w-xl mx-auto mb-8">
+          {!isFormVisible ? (
+            <button
+              onClick={() => setIsFormVisible(true)}
+              className="w-full bg-white rounded-lg shadow-sm p-4 text-gray-500 text-left hover:shadow-md transition-shadow"
+            >
+              <Plus className="inline-block mr-2 h-5 w-5" />
+              Take a note...
+            </button>
+          ) : (
+            <form
+              onSubmit={addNote}
+              className="bg-white rounded-lg shadow-sm p-4"
+            >
+              <textarea
+                value={newNote.text}
+                onChange={(e) =>
+                  setNewNote({ ...newNote, text: e.target.value })
+                }
+                placeholder="Take a note..."
+                className="w-full resize-none border-0 focus:ring-0 p-2 mb-3"
+                rows={3}
+                autoFocus
+              />
+              <div className="flex justify-between items-center">
+                <input
+                  type="color"
+                  value={newNote.color}
+                  onChange={(e) =>
+                    setNewNote({ ...newNote, color: e.target.value })
+                  }
+                  className="w-8 h-8 rounded-full cursor-pointer"
+                />
+                <div className="space-x-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsFormVisible(false)}
+                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
+                  >
+                    Close
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                  >
+                    Add
+                  </button>
+                </div>
+              </div>
+            </form>
+          )}
         </div>
 
-        <NoteForm onAddNote={addNote} />
-
+        {/* Notes Grid */}
         <DragDropContext onDragEnd={handleDragEnd}>
           <StrictModeDroppable droppableId="notes">
             {(provided) => (
               <div
                 {...provided.droppableProps}
                 ref={provided.innerRef}
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6"
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
               >
                 {filteredNotes.map((note, index) => (
                   <Draggable key={note.id} draggableId={note.id} index={index}>
-                    {(provided) => (
+                    {(provided, snapshot) => (
                       <div
                         ref={provided.innerRef}
                         {...provided.draggableProps}
@@ -123,49 +186,54 @@ function App() {
                           ...provided.draggableProps.style,
                           backgroundColor: note.color,
                         }}
-                        className="p-4 rounded-lg shadow-md"
+                        className={`rounded-lg shadow-sm hover:shadow-md transition-shadow ${
+                          snapshot.isDragging ? "shadow-lg" : ""
+                        }`}
                       >
                         {editIndex === index ? (
-                          <div className="space-y-2">
-                            <input
-                              type="text"
+                          <div className="p-4">
+                            <textarea
                               value={editText}
                               onChange={(e) => setEditText(e.target.value)}
-                              className="w-full px-3 py-2 border rounded-lg bg-white text-gray-900 border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+                              className="w-full resize-none border-0 focus:ring-0 bg-transparent mb-2"
+                              rows={4}
+                              autoFocus
                             />
                             <div className="flex justify-end space-x-2">
                               <button
                                 onClick={saveEditedNote}
-                                className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-200"
+                                className="p-2 text-sm hover:bg-black/5 rounded"
                               >
                                 Save
                               </button>
                               <button
                                 onClick={cancelEditing}
-                                className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition duration-200"
+                                className="p-2 text-sm hover:bg-black/5 rounded"
                               >
                                 Cancel
                               </button>
                             </div>
                           </div>
                         ) : (
-                          <>
-                            <p className="mb-4">{note.text}</p>
-                            <div className="flex justify-end space-x-2">
+                          <div className="p-4 group">
+                            <p className="whitespace-pre-wrap mb-4">
+                              {note.text}
+                            </p>
+                            <div className="flex justify-end space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
                               <button
                                 onClick={() => startEditing(index)}
-                                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-200"
+                                className="p-2 text-gray-600 hover:bg-black/5 rounded"
                               >
-                                Edit
+                                <Edit2 className="h-4 w-4" />
                               </button>
                               <button
                                 onClick={() => deleteNote(index)}
-                                className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition duration-200"
+                                className="p-2 text-gray-600 hover:bg-black/5 rounded"
                               >
-                                Delete
+                                <Trash2 className="h-4 w-4" />
                               </button>
                             </div>
-                          </>
+                          </div>
                         )}
                       </div>
                     )}
@@ -176,7 +244,7 @@ function App() {
             )}
           </StrictModeDroppable>
         </DragDropContext>
-      </div>
+      </main>
     </div>
   );
 }
