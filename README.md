@@ -1,70 +1,85 @@
-# Getting Started with Create React App
+# Prisma Notes App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Prisma Notes is a responsive and feature-rich notes-taking web application built using React. The app allows users to create, edit, search, pin, and manage notes with a user-friendly interface and vibrant gradient themes.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- **Dark Mode Support:** Toggle between light and dark themes.
+- **Responsive Design:** Works seamlessly across different devices.
+- **Search Functionality:** Quickly find notes with a built-in search bar.
+- **Drag and Drop:** Reorder notes using drag-and-drop functionality.
+- **Gradient Themes:** Choose from various vibrant gradient themes for your notes.
+- **Pin Notes:** Highlight important notes by pinning them.
+- **Local Storage:** All notes and preferences are saved locally, ensuring persistence across sessions.
 
-### `npm start`
+## Technologies Used
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **Frontend:** React, Tailwind CSS
+- **Icons:** Lucide React
+- **Drag-and-Drop:** React Beautiful DnD
+- **State Management:** React Hooks
+- **Storage:** Browser LocalStorage
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Installation and Setup
 
-### `npm test`
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/aaryan4985/notes-app.git
+   cd notes-app
+   ```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-### `npm run build`
+3. Start the development server:
+   ```bash
+   npm start
+   ```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+4. Open your browser and navigate to:
+   ```
+   http://localhost:3000
+   ```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Usage
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+1. Use the **search bar** at the top to search for notes.
+2. Click the **Create Note** button to add a new note.
+3. Assign a gradient theme to your note while creating or editing.
+4. **Pin notes** to keep them at the top of the list.
+5. Drag and drop notes to reorder them.
+6. Toggle between **light** and **dark** themes using the theme switcher.
 
-### `npm run eject`
+## Folder Structure
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```
+notes-app/
+├── public/         # Static files
+├── src/
+│   ├── components/ # Reusable components
+│   ├── assets/     # Static assets
+│   ├── App.js      # Main application component
+│   ├── index.js    # Entry point
+│   ├── StrictModeDroppable.js # Custom wrapper for React DnD
+├── package.json    # Project metadata and dependencies
+└── README.md       # Project documentation
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Contributing
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Contributions are welcome! If you have ideas for improvements or new features, feel free to fork the repository and submit a pull request.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## License
 
-## Learn More
+This project is licensed under the [MIT License](LICENSE).
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Acknowledgements
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- [Lucide Icons](https://lucide.dev/) for the beautiful icons.
+- [React Beautiful DnD](https://github.com/atlassian/react-beautiful-dnd) for the drag-and-drop feature.
 
-### Code Splitting
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
 
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
